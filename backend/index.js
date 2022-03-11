@@ -3,6 +3,11 @@ import cors from "cors";
 import { v4 as uuid } from "uuid";
 import session from "express-session";
 import { CreateUser, GetUser, HashPassword } from "./db.js";
+import {fileURLToPath} from "url";
+import path, {dirname} from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 //Session config
 const config = {
@@ -16,29 +21,30 @@ const config = {
 const app = Express();
 app.use(cors());
 app.use(session(config));
+app.use(Express.static(path.join(__dirname,"../frontend/public")));
 
 const PORT = 3001;
 let requests = 0;
-const secretToken = uuid();
 
-app.get("/secret", (req, res) => {
-  const token = req.query.token;
-  requests++;
-  if (token === secretToken) {
-    res.send({
-      result: 200,
-      requests: requests,
-      message: "This is a very secret message.",
-    });
-  } else {
-    res.send({ result: 401, message: "Invalid token!" });
-  }
+
+app.get("/" , (req, res) =>{
+  res.sendFile(path.join(__dirname,"../frontend/index.html"));
 });
+app.get("/login" , (req, res) =>{
+  res.sendFile(path.join(__dirname,"../frontend/login.html"));
+});
+app.get("/register" , (req, res) =>{
+  res.sendFile(path.join(__dirname,"../frontend/register.html"));
+});
+
+
+
 
 app.post("/login", (req, res) => {
   const email = req.query.email;
   const password = req.query.password;
   requests++;
+  
 
   GetUser(email).then((r) => {
     //if this email address is not taken
