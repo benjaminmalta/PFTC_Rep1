@@ -1,6 +1,8 @@
 import Express from "express";
 import cors from "cors";
 import { v4 as uuid } from "uuid";
+import session from "express-session";
+import { CreateUser } from "./db";
 
 const app = Express();
 app.use(cors());
@@ -28,12 +30,27 @@ app.post("/login", (req, res) => {
   const password = req.query.password;
   requests++;
   if (email == "test@test.com" && password == "123") {
-    res.send("Hello Test!");
+    res.send({ result: "success", email: "test@test.com", name: "David" });
   } else {
-    res.send("Invalid credentials!");
+    res.send({ result: "fail" });
   }
 });
 
-console.log(secretToken);
+app.post("/register", (req, res) => {
+  const email = req.query.email;
+  const password = req.query.password;
+  const name = req.query.name;
+  const surname = req.query.surname;
+
+  CreateUser(anme,surname,email,password).then((r) => {
+    console.log(r);
+  });
+
+  requests++;
+  console.log(req.query);
+  res.send({ result: "success", email: email, name: name });
+});
+
+//console.log(secretToken);
 
 app.listen(PORT, () => console.log("Server Listening on port: " + PORT));
