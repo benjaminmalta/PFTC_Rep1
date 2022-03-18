@@ -2,13 +2,17 @@ import Express from "express";
 import cors from "cors";
 import { v4 as uuid } from "uuid";
 import session from "express-session";
-import { CreateUser, GetUser, HashPassword } from "./db.js";
+import { CreateUser, GetUser, HashPassword, GOOGLE_APPLICATION_CREDENTIALS, } from "./db.js";
 import {fileURLToPath} from "url";
 import path, {dirname} from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+import https from "https";
+import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
+
+const PORT = 443;
 //Session config
 const config = {
   genid: (req) => uuid(),
@@ -23,7 +27,7 @@ app.use(cors());
 app.use(session(config));
 app.use(Express.static(path.join(__dirname,"../frontend/public")));
 
-const PORT = 80;
+
 let requests = 0;
 
 
@@ -37,7 +41,33 @@ app.get("/register" , (req, res) =>{
   res.sendFile(path.join(__dirname,"../frontend/register.html"));
 });
 
+const startServerEncrypted = async () => {
+  const sm = new SecretManagerServiceClient({
+    projectId: 'pftc-msd-0000001',
+    keyFilename: GOOGLE_APPLICATION_CREDENTIALS,
+  });
 
+  const [pub] = await sm.accessSecretVersion({
+    name: 'projects/88778565218/secrets/PublicKey/versions/1',
+  });
+
+  const [prvt] = await sm.accessSecretVersion({
+    name: 'projects/88778565218/secrets/PrivateKey/versions/1',
+  });
+
+  const sslOptions = {
+    key: prvt.payload.data.toString(),
+    cert: pub.payload.data.toString(),
+  };
+
+  https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log("Secure Server Listenning on port: " + PORT);
+  });
+
+};
+const startServer = () => {
+  app.listen(PORT, () => console.log("Server Listening on port: " + PORT));
+};
 
 
 app.post("/login", (req, res) => {
@@ -93,4 +123,6 @@ app.post("/register", (req, res) => {
 
 //console.log(secretToken);
 
-app.listen(PORT, () => console.log("Server Listening on port: " + PORT));
+startServerEncrypted();
+
+
