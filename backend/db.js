@@ -6,7 +6,7 @@ export const GOOGLE_APPLICATION_CREDENTIALS = "./key.json";
 
 //Instantiating Firestore with project details
 const db = new Firestore({
-  projectId: "pftc0000001",
+  projectId: "pftc-msd-0000001",
   keyFilename: GOOGLE_APPLICATION_CREDENTIALS,
 });
 

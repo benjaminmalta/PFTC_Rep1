@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 import https from "https";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
-const PORT = 443;
+const PORT = 80;
 //Session config
 const config = {
   genid: (req) => uuid(),
@@ -23,9 +23,9 @@ const config = {
 };
 
 const app = Express();
+app.use(Express.static(path.join(__dirname,"../frontend/public")));
 app.use(cors());
 app.use(session(config));
-app.use(Express.static(path.join(__dirname,"../frontend/public")));
 
 
 let requests = 0;
@@ -65,15 +65,14 @@ const startServerEncrypted = async () => {
   });
 
 };
-const startServer = () => {
-  app.listen(PORT, () => console.log("Server Listening on port: " + PORT));
-};
+
 
 
 app.post("/login", (req, res) => {
   const email = req.query.email;
   const password = req.query.password;
   requests++;
+  console.log(email);
   
 
   GetUser(email).then((r) => {
@@ -123,6 +122,9 @@ app.post("/register", (req, res) => {
 
 //console.log(secretToken);
 
-startServerEncrypted();
+//startServerEncrypted();
+const startServer = () => {
+  app.listen(PORT, () => console.log("Server Listening on port: " + PORT));
+};
 
-
+startServer();
