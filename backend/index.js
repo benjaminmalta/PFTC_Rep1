@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 import https from "https";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
-const PORT = 80;
+const PORT = 443;
 //Session config
 const config = {
   genid: (req) => uuid(),
